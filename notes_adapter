@@ -1,0 +1,101 @@
+package com.example.notes_go.Adapter
+
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.notes_go.Models.Notes
+import com.example.notes_go.R
+import kotlin.random.Random
+
+class NotesAdapter(private val context: Context, val listener: NotesClickListener) : RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
+
+    private val notesList: ArrayList<Note> = ArrayList()
+    private val fullList: ArrayList<Note> = ArrayList()
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+        return NoteViewHolder(
+            LayoutInflater.from(context).inflate(R.layout.list_item, parent, false)
+        )
+    }
+
+    override fun getItemCount(): Int {
+        return notesList.size
+    }
+
+    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+        val currentNote = notesList[position]
+        holder.title.text = currentNote.title
+        holder.title.isSelected = true
+
+        holder.note_tv.text = currentNote.note
+        holder.date.text = currentNote.date
+        holder.date.isSelected = true
+
+        holder.notesLayout.setCardBackgroundColor(holder.itemView.resources.getColor(randomColor(), null))
+
+        holder.notesLayout.setOnClickListener {
+            listener.onItemClicked(notesList[holder.adapterPosition])
+        }
+
+        holder.notesLayout.setOnLongClickListener {
+            listener.onLongItemClicked(notesList[holder.adapterPosition], holder.notesLayout)
+            true
+        }
+    }
+            fun updateList(newList: List<Note>){
+
+                fullList.clear()
+                fullList.addAll(newList)
+                notifyDataSetChanged()
+
+            }
+
+            fun filterList(search : String){
+                notesList.clear()
+
+                for (item in fullList){
+                    if (item.title?.lowercase()?.contains(search.lowercase()) == true ||
+                            item.note?.lowercase()?.contains(search.lowercase()) == true){
+                        notesList.add(item)
+                    }
+                }
+
+                notifyDataSetChanged()
+            }
+
+    private fun randomColor(): Int {
+        val colors = arrayOf(
+            R.color.color1_biege,
+            R.color.color2_cyan,
+            R.color.color3_orange,
+            R.color.color4_green,
+            R.color.color5_white,
+            R.color.color6_blue,
+            R.color.color7_navy_blue,
+            R.color.color8_sky_blue,
+            R.color.color9_brown,
+            R.color.color10_yellow,
+            R.color.color11_purple,
+            R.color.color12_pink
+        )
+        return colors.random()
+    }
+
+    inner class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val notesLayout: CardView = itemView.findViewById(R.id.card_layout)
+        val title: TextView = itemView.findViewById(R.id.tv_title)
+        val note_tv: TextView = itemView.findViewById(R.id.tv_note)
+        val date: TextView = itemView.findViewById(R.id.tv_date)
+    }
+
+    interface NotesClickListener {
+        fun onItemClicked(note: Note)
+        fun onLongItemClicked(note: Note, cardView: CardView)
+    }
+
+    data class Note(val title: String, val note: String, val date: String)
+}
