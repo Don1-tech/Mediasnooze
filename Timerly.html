@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timerly</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #eef1f6;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 800px;
+      padding: 60px;
+      border-radius: 10px;
+      color: #fff;
+      background-color: #6994c5;
+      box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .title-icon {
+      margin-right: 10px;
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 10px;
+      font-weight: 500;
+      color: #ffffff62;
+      text-transform: uppercase;
+    }
+
+    h3 {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 25px;
+    }
+
+    .main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .number {
+      position: relative;
+      font-size: 60px;
+      font-weight: 400;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .colon {
+      font-size: 25px;
+    }
+
+    .btns {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 5px;
+      color: #000;
+      border: none;
+      background-color: #fff;
+      font-weight: bold;
+      visibility: visible;
+      float: left;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .date-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 12px;
+      color: #ffffff62;
+    }
+
+    .date {
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="wrapper">
+      <div class="title">
+        <h1 class="title-icon">&#x23F0;</h1>
+        <h1>Timerly</h1>
+      </div>
+      <div class="main">
+        <h3>Clock</h3>
+        <div class="number" id="clock"></div>
+        <h3>Stopwatch</h3>
+        <div class="number" id="stopwatch"></div>
+        <div class="btns">
+          <button class="btn" id="startBtn" onclick="toggleTimer()">Start</button>
+          <button class="btn" id="resetBtn" onclick="resetTimer()" disabled>Reset</button>
+          <button class="btn" id="lapBtn" onclick="recordLap()" disabled>Lap</button>
+          <button class="btn" id="resumeBtn" onclick="resumeTimer()" disabled>Resume</button>
+        </div>
+        <div id="lapsContainer"></div>
+      </div>
+      <div class="date-container">
+        <h3>Date</h3>
+        <div class="date" id="date"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Get the clock element
+    const clockElement = document.getElementById('clock');
+    // Get the stopwatch element
+    const stopwatchElement = document.getElementById('stopwatch');
+    // Get the laps container
+    const lapsContainer = document.getElementById('lapsContainer');
+    // Get the date element
+    const dateElement = document.getElementById('date');
+
+    // Function to update the clock display
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const clockString = `${hours}:${minutes}:${seconds}`;
+      clockElement.textContent = clockString;
+    }
+
+    // Function to update the stopwatch display
+    function updateStopwatch() {
+      const minutes = Math.floor(stopwatchTime / 6000);
+      const seconds = Math.floor((stopwatchTime % 6000) / 100);
+      const milliseconds = stopwatchTime % 100;
+      const stopwatchString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+      stopwatchElement.textContent = stopwatchString;
+    }
+
+    // Set the initial stopwatch time, interval ID, and stopwatch status
+    let stopwatchTime = 0;
+    let stopwatchIntervalId;
+    let isStopwatchRunning = false;
+
+    // Function to toggle between start and stop states of the stopwatch
+    function toggleTimer() {
+      if (isStopwatchRunning) {
+        // Stop the stopwatch
+        clearInterval(stopwatchIntervalId);
+        isStopwatchRunning = false;
+
+        document.getElementById('startBtn').textContent = 'Start';
+        document.getElementById('resetBtn').disabled = false;
+        document.getElementById('lapBtn').disabled = true;
+        document.getElementById('resumeBtn').disabled = false;
+      } else {
+        // Start the stopwatch
+        stopwatchIntervalId = setInterval(() => {
+          stopwatchTime++;
+          updateStopwatch();
+        }, 10);
+        isStopwatchRunning = true;
+
+        document.getElementById('startBtn').textContent = 'Stop';
+        document.getElementById('resetBtn').disabled = true;
+        document.getElementById('lapBtn').disabled = false;
+        document.getElementById('resumeBtn').disabled = true;
+      }
+    }
+
+    // Function to reset the stopwatch
+    function resetTimer() {
+      clearInterval(stopwatchIntervalId);
+      stopwatchTime = 0;
+      updateStopwatch();
+      isStopwatchRunning = false;
+
+      document.getElementById('startBtn').textContent = 'Start';
+      document.getElementById('resetBtn').disabled = true;
+      document.getElementById('lapBtn').disabled = true;
+      document.getElementById('resumeBtn').disabled = true;
+
+      // Clear laps
+      lapsContainer.innerHTML = '';
+    }
+
+    // Function to record a lap time
+    function recordLap() {
+      const lapTime = stopwatchElement.textContent;
+      const lapElement = document.createElement('p');
+      lapElement.textContent = lapTime;
+      lapsContainer.appendChild(lapElement);
+    }
+
+    // Function to resume the stopwatch
+    function resumeTimer() {
+      if (!isStopwatchRunning) {
+        stopwatchIntervalId = setInterval(() => {
+          stopwatchTime++;
+          updateStopwatch();
+        }, 10);
+        isStopwatchRunning = true;
+
+        document.getElementById('startBtn').textContent = 'Stop';
+        document.getElementById('resetBtn').disabled = true;
+        document.getElementById('lapBtn').disabled = false;
+        document.getElementById('resumeBtn').disabled = true;
+      }
+    }
+
+    // Function to update the date display
+    function updateDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const day = now.getDate();
+      const dateString = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+      dateElement.textContent = dateString;
+    }
+
+    // Update the date display initially
+    updateDate();
+
+    // Update the date display every second
+    setInterval(updateDate, 1000);
+
+    // Update the clock display every second
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+
+</html>
